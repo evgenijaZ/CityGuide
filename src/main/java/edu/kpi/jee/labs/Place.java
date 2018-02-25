@@ -4,16 +4,26 @@ package edu.kpi.jee.labs;
  * @author Yevheniia Zubrych on 25.02.2018.
  */
 public class Place {
+    private int id;
     private String name;
     private String address;
     private double latitude;
     private double longitude;
 
-    public Place(String name, String address, double latitude, double longitude) {
+    public Place(int id, String name, String address, double latitude, double longitude) {
+        this.id = id;
         this.name = name;
         this.address = address;
         this.latitude = latitude;
         this.longitude = longitude;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getName() {
