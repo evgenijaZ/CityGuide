@@ -1,4 +1,4 @@
-package edu.kpi.jee.labs;
+package edu.kpi.jee.labs.Entities;
 
 /**
  * @author Yevheniia Zubrych on 25.02.2018.
