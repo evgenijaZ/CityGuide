@@ -97,6 +97,21 @@ public class AttractionsTable {
             return null;
     }
 
+    public void updatePlaceById(int id, Place place) throws SQLException {
+        String query = String.format(Locale.US, "UPDATE `attractions`.`place` SET `p_name`='%s',`p_address`='%s',`p_lat`='%10.6f',`p_lng`='%10.6f',`p_rating`='%3.1f' WHERE `p_id`='%d';", place.getName(), place.getAddress(), place.getLatitude(), place.getLongitude(), place.getRating(), id);
+        execute(query);
+    }
+
+    public void deletePlaceByName(String name) throws SQLException {
+        String query = String.format(Locale.US, "DELETE FROM `attractions`.`place` WHERE `p_name`='%s';", name);
+        execute(query);
+    }
+
+    public void deletePlaceById(int id) throws SQLException {
+        String query = String.format(Locale.US, "DELETE FROM `attractions`.`place` WHERE `p_id`='%d';", id);
+        execute(query);
+    }
+
     private void execute(String query) throws SQLException {
         if (connection != null && !connection.isClosed()) {
             Statement statement = connection.createStatement();
