@@ -94,10 +94,15 @@ public class Place {
             return false;
         }
         Place place = (Place) obj;
-        return (this.latitude == place.getLatitude() &&
-                this.longitude == place.getLongitude() &&
-                this.rating == place.getRating() &&
+        return (Math.abs(this.latitude - place.getLatitude()) < 0.00001 &&
+                Math.abs(this.longitude - place.getLongitude()) < 0.00001 &&
+                Math.abs(this.rating - place.getRating()) < 0.001 &&
                 this.name.equals(place.getName()) &&
                 this.address.equals(place.getAddress()));
+    }
+
+    @Override
+    public int hashCode() {
+        return (int) (longitude * 1000 + latitude);
     }
 }
