@@ -85,4 +85,19 @@ public class Place {
     public void setRating(double rating) {
         this.rating = rating;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this)
+            return true;
+        if (obj == null || obj.getClass() != this.getClass()) {
+            return false;
+        }
+        Place place = (Place) obj;
+        return (this.latitude == place.getLatitude() &&
+                this.longitude == place.getLongitude() &&
+                this.rating == place.getRating() &&
+                this.name.equals(place.getName()) &&
+                this.address.equals(place.getAddress()));
+    }
 }
