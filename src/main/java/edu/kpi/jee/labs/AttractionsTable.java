@@ -67,13 +67,14 @@ public class AttractionsTable {
         String query = String.format(Locale.US, "SELECT * FROM `attractions`.`place` WHERE `place`.`p_name` = '%s'", name);
         ResultSet resultSet = executeQuery(query);
         if (resultSet != null) {
-            resultSet.next();
-            int id = resultSet.getInt("p_id");
-            String address = resultSet.getString("p_address");
-            float latitude = resultSet.getFloat("p_lat");
-            float longitude = resultSet.getFloat("p_lng");
-            float rating = resultSet.getFloat("p_rating");
-            return new Place(id, name, address, latitude, longitude, rating);
+            while (resultSet.next()) {
+                int id = resultSet.getInt("p_id");
+                String address = resultSet.getString("p_address");
+                float latitude = resultSet.getFloat("p_lat");
+                float longitude = resultSet.getFloat("p_lng");
+                float rating = resultSet.getFloat("p_rating");
+                return new Place(id, name, address, latitude, longitude, rating);
+            } return null;
         } else
             return null;
     }
