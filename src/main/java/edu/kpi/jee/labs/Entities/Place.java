@@ -11,6 +11,15 @@ public class Place {
     private double longitude;
     private double rating;
 
+    public Place(String name, String address, double latitude, double longitude) {
+        this.id = 0;
+        this.name = name;
+        this.address = address;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.rating = 0;
+    }
+
     public Place(int id, String name, String address, double latitude, double longitude) {
         this.id = id;
         this.name = name;
