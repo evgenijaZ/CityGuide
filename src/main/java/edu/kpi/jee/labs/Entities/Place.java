@@ -20,6 +20,15 @@ public class Place {
         this.rating = 0;
     }
 
+    public Place(int id, String name, String address, double latitude, double longitude, double rating) {
+        this.id = id;
+        this.name = name;
+        this.address = address;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.rating = rating;
+    }
+
     public int getId() {
         return id;
     }
