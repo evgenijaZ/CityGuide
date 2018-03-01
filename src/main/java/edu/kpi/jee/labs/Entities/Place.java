@@ -9,6 +9,7 @@ public class Place {
     private String address;
     private double latitude;
     private double longitude;
+    private double rating;
 
     public Place(int id, String name, String address, double latitude, double longitude) {
         this.id = id;
@@ -16,6 +17,7 @@ public class Place {
         this.address = address;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.rating = 0;
     }
 
     public int getId() {
@@ -56,5 +58,13 @@ public class Place {
 
     public void setLongitude(double longitude) {
         this.longitude = longitude;
+    }
+
+    public double getRating() {
+        return rating;
+    }
+
+    public void setRating(double rating) {
+        this.rating = rating;
     }
 }
