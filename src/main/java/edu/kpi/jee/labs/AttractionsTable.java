@@ -4,6 +4,8 @@ import edu.kpi.jee.labs.Entities.Category;
 import edu.kpi.jee.labs.Entities.Place;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -16,20 +18,24 @@ public class AttractionsTable {
     private final String PASS = "root";
     private Connection connection;
 
-    public void openConnection() {
+    public Connection openConnection() {
         try {
             connection = DriverManager.getConnection(URL, USER, PASS);
+            return connection;
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return null;
     }
 
-    public void closeConnection() {
+    public Connection closeConnection() {
         try {
             connection.close();
+            return connection;
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return null;
     }
 
     public void insertPlace(String name, String address, float latitude, float longitude) throws SQLException {
@@ -43,7 +49,7 @@ public class AttractionsTable {
     }
 
     public void insertPlace(Place place) throws SQLException {
-        String query = String.format(Locale.US,"INSERT INTO `attractions`.`place` (`p_name`, `p_address`, `p_lat`, `p_lng`, `p_rating`) VALUES ('%s', '%s', '%10.6f', '%10.6f', '%-3.1f');", place.getName(), place.getAddress(), place.getLatitude(), place.getLongitude(), place.getRating());
+        String query = String.format(Locale.US, "INSERT INTO `attractions`.`place` (`p_name`, `p_address`, `p_lat`, `p_lng`, `p_rating`) VALUES ('%s', '%s', '%10.6f', '%10.6f', '%-3.1f');", place.getName(), place.getAddress(), place.getLatitude(), place.getLongitude(), place.getRating());
         execute(query);
     }
 
@@ -72,6 +78,25 @@ public class AttractionsTable {
             return null;
     }
 
+    public List <Place> getPlaces() throws SQLException {
+        String query = String.format(Locale.US, "SELECT * FROM `attractions`.`place`");
+        List <Place> places = new ArrayList <Place>();
+        ResultSet resultSet = executeQuery(query);
+        if (resultSet != null) {
+            while (resultSet.next()) {
+                int id = resultSet.getInt("p_id");
+                String name = resultSet.getString("p_name");
+                String address = resultSet.getString("p_address");
+                float latitude = resultSet.getFloat("p_lat");
+                float longitude = resultSet.getFloat("p_lng");
+                float rating = resultSet.getFloat("p_rating");
+                places.add(new Place(id, name, address, latitude, longitude, rating));
+            }
+            return places;
+        } else
+            return null;
+    }
+
     private void execute(String query) throws SQLException {
         if (connection != null && !connection.isClosed()) {
             Statement statement = connection.createStatement();
@@ -79,7 +104,7 @@ public class AttractionsTable {
         } else throw new IllegalStateException();
     }
 
-    private ResultSet executeQuery(String query) throws SQLException{
+    private ResultSet executeQuery(String query) throws SQLException {
         if (connection != null && !connection.isClosed()) {
             Statement statement = connection.createStatement();
             return statement.executeQuery(query);
