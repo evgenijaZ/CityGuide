@@ -41,6 +41,14 @@ public class AttractionsTableTest {
     }
 
 
+    @Test
+    public void deletingTest() throws SQLException{
+        Place place = new Place("Potemkin Stairs", "Primorsky Boulevard, 9, Odessa, Ukraine", -46.488122, -149.258856);
+        attractionsTable.insertPlace(place);
+        attractionsTable.deletePlaceByName(place.getName());
+        assertEquals(attractionsTable.getPlaceByName(place.getName()), null);
+    }
+
     @After
     public void closeConnection(){
         attractionsTable.closeConnection();
