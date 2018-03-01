@@ -40,6 +40,15 @@ public class AttractionsTableTest {
         assertEquals(expectedPlace, receivedPlace);
     }
 
+    @Test
+    public void updatingTest() throws SQLException{
+        Place place = new Place(76,"Potemkin Stairs", "Primorsky Boulevard, 9, Odessa, Ukraine", -46.488122, -149.258856);
+        attractionsTable.insertPlace(place);
+        place.setRating(5.0);
+        attractionsTable.updatePlaceById(place.getId(),place);
+        assertEquals(attractionsTable.getPlaceById(place.getId()).getRating(), 5.0, 0.01);
+        attractionsTable.deletePlaceById(76);
+    }
 
     @Test
     public void deletingTest() throws SQLException{
