@@ -1,22 +1,25 @@
 package edu.kpi.jee.labs.dao;
 
-import java.io.IOException;
 import java.sql.*;
 
 /**
  * @author Yevheniia Zubrych on 15.03.2018.
  */
-public class DBHandler {
-    private String pathToDB;
-    private final String URL = "jdbc:mysql://localhost:3306/attractions?useUnicode=true&useSSL=true&useJDBCCompliantTimezoneShift=true" +
-            "&useLegacyDatetimeCode=false&serverTimezone=UTC";
+public class JDBCHandler {
+
+    private final String URL = "jdbc:mysql://localhost:3306/";
     private final String USER = "root";
     private final String PASS = "root";
+    private String dbName;
+
+
+    public JDBCHandler(String dbName) {
+        this.dbName = dbName;
+    }
 
     public Connection openConnection() {
         try {
-            Connection connection = DriverManager.getConnection(URL, USER, PASS);
-            return connection;
+            return DriverManager.getConnection(URL + dbName, USER, PASS);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -55,5 +58,26 @@ public class DBHandler {
             e.printStackTrace();
         }
         return null;
+    }
+
+    public PreparedStatement getPrepareStatement(String sql) {
+        PreparedStatement preparedStatement = null;
+        try (Connection connection = openConnection()) {
+            preparedStatement = connection.prepareStatement(sql);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return preparedStatement;
+    }
+
+
+    public void closePrepareStatement(PreparedStatement preparedStatement) {
+        if (preparedStatement != null) {
+            try {
+                preparedStatement.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
