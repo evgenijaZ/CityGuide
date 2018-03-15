@@ -14,6 +14,9 @@ public class Place {
     private List <Rating> ratings;
     private List <Category> categories;
 
+    public Place() {
+    }
+
     public Place(String name, String address, double latitude, double longitude) {
         this.name = name;
         this.address = address;
@@ -39,7 +42,7 @@ public class Place {
         this.categories = categories;
     }
 
-    public void addRating(Rating rating){
+    public void addRating(Rating rating) {
         ratings.add(rating);
     }
 
