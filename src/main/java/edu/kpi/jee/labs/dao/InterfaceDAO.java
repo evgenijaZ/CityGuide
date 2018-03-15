@@ -15,8 +15,6 @@ public interface InterfaceDAO<E, K> {
 
     public abstract boolean delete(E entity);
 
-    public abstract boolean deleteByKey(K key);
-
     public abstract boolean create(E entity);
 
 }
