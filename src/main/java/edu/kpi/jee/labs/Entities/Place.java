@@ -1,5 +1,7 @@
 package edu.kpi.jee.labs.Entities;
 
+import java.util.List;
+
 /**
  * @author Yevheniia Zubrych on 25.02.2018.
  */
@@ -9,15 +11,14 @@ public class Place {
     private String address;
     private double latitude;
     private double longitude;
-    private double rating;
+    private List <Rating> ratings;
+    private List <Category> categories;
 
     public Place(String name, String address, double latitude, double longitude) {
-        this.id = 0;
         this.name = name;
         this.address = address;
         this.latitude = latitude;
         this.longitude = longitude;
-        this.rating = 0;
     }
 
     public Place(int id, String name, String address, double latitude, double longitude) {
@@ -26,16 +27,28 @@ public class Place {
         this.address = address;
         this.latitude = latitude;
         this.longitude = longitude;
-        this.rating = 0;
     }
 
-    public Place(int id, String name, String address, double latitude, double longitude, double rating) {
+    public Place(int id, String name, String address, double latitude, double longitude, List <Rating> ratings, List <Category> categories) {
         this.id = id;
         this.name = name;
         this.address = address;
         this.latitude = latitude;
         this.longitude = longitude;
-        this.rating = rating;
+        this.ratings = ratings;
+        this.categories = categories;
+    }
+
+    public void addRating(Rating rating){
+        ratings.add(rating);
+    }
+
+    public float getRating() {
+        float resultRating = 0;
+        for (Rating rating : ratings) {
+            resultRating += rating.getValue() / ratings.size();
+        }
+        return resultRating;
     }
 
     public int getId() {
@@ -78,12 +91,20 @@ public class Place {
         this.longitude = longitude;
     }
 
-    public double getRating() {
-        return rating;
+    public List <Rating> getRatings() {
+        return ratings;
     }
 
-    public void setRating(double rating) {
-        this.rating = rating;
+    public void setRatings(List <Rating> ratings) {
+        this.ratings = ratings;
+    }
+
+    public List <Category> getCategories() {
+        return categories;
+    }
+
+    public void setCategories(List <Category> categories) {
+        this.categories = categories;
     }
 
     @Override
@@ -96,7 +117,7 @@ public class Place {
         Place place = (Place) obj;
         return (Math.abs(this.latitude - place.getLatitude()) < 0.00001 &&
                 Math.abs(this.longitude - place.getLongitude()) < 0.00001 &&
-                Math.abs(this.rating - place.getRating()) < 0.001 &&
+                Math.abs(this.getRating() - place.getRating()) < 0.001 &&
                 this.name.equals(place.getName()) &&
                 this.address.equals(place.getAddress()));
     }
