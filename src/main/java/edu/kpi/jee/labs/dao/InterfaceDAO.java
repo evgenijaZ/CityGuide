@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * @author Yevheniia Zubrych on 15.03.2018.
  */
-public abstract class AbstractDAO<E, K> {
+public interface InterfaceDAO<E, K> {
 
     public abstract List <E> getAll();
 
