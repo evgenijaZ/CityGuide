@@ -48,30 +48,38 @@ public abstract class DAO<E, K> implements InterfaceDAO <E, K> {
     public String getDeleteByIdQuery() {
         return DELETE_BY_ID;
     }
+
     private Object getEntityFromResultSet(ResultSet resultSet) {
         Class <?> entityClass = this.getEntityClass();
         Object instance = null;
         try {
             instance = entityClass.newInstance();
-            for (String[] aMapping : getMapping()) {
-                String fieldName = aMapping[0];
-                String columnName = aMapping[1];
+            for (String[] columnFieldPair : getMapping()) {
+                String fieldName = columnFieldPair[0];
+                String columnName = columnFieldPair[1];
 
                 Field field = entityClass.getDeclaredField(fieldName);
                 field.setAccessible(true);
                 String value = resultSet.getString(columnName);
                 String fieldType = field.getType().getSimpleName();
                 switch (fieldType) {
-                    case "int": {
-                        field.setInt(instance, Integer.parseInt(value));
-                        break;
-                    }
                     case "String": {
                         field.set(instance, value);
                         break;
                     }
+                    case "int":
+                    case "Integer": {
+                        field.setInt(instance, Integer.parseInt(value));
+                        break;
+                    }
+                    case "Double":
                     case "double": {
                         field.setDouble(instance, Double.parseDouble(value));
+                        break;
+                    }
+                    case "boolean":
+                    case"Boolean":{
+                        field.setBoolean(instance, Boolean.getBoolean(value));
                         break;
                     }
                 }
