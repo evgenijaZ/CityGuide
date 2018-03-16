@@ -8,6 +8,7 @@ import java.sql.*;
 public class JDBCHandler {
 
     private final String URL = "jdbc:mysql://localhost:3306/";
+    private final String parameters = "?useUnicode=true&useSSL=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
     private final String USER = "root";
     private final String PASS = "root";
     private String dbName;
@@ -19,7 +20,7 @@ public class JDBCHandler {
 
     public Connection openConnection() {
         try {
-            return DriverManager.getConnection(URL + dbName, USER, PASS);
+            return DriverManager.getConnection(URL + dbName + parameters, USER, PASS);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -62,8 +63,9 @@ public class JDBCHandler {
 
     public PreparedStatement getPrepareStatement(String sql) {
         PreparedStatement preparedStatement = null;
-        try (Connection connection = openConnection()) {
-            preparedStatement = connection.prepareStatement(sql);
+        try {
+            Connection connection = openConnection();
+            preparedStatement = connection.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -72,6 +74,7 @@ public class JDBCHandler {
 
 
     public void closePrepareStatement(PreparedStatement preparedStatement) {
+        System.out.println(preparedStatement);
         if (preparedStatement != null) {
             try {
                 preparedStatement.close();
