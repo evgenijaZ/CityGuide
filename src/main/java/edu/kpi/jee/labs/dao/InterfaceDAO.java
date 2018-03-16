@@ -7,14 +7,14 @@ import java.util.List;
  */
 public interface InterfaceDAO<E, K> {
 
-    public abstract List <E> getAll();
+    List <E> getAll();
 
-    public abstract boolean update(E entity);
+    boolean update(E entity);
 
-    public abstract E getByKey(K key);
+    E getByKey(K key);
 
-    public abstract boolean delete(E entity);
+    boolean delete(E entity);
 
-    public abstract boolean create(E entity);
+    boolean create(E entity);
 
 }
