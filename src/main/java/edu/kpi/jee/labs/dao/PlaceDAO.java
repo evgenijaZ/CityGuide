@@ -21,6 +21,11 @@ public class PlaceDAO extends DAO <Place, Integer> {
     }
 
     @Override
+    protected Class <Integer> getKeyClass() {
+        return Integer.class;
+    }
+
+    @Override
     public String[][] getNameMapping() {
         return nameMapping;
     }
