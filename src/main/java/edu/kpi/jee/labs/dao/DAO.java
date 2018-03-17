@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,6 +13,7 @@ import java.util.List;
  */
 public abstract class DAO<E, K> implements InterfaceDAO <E, K> {
 
+    private String TRUNCATE_TABLE = "TRUNCATE TABLE %s.%s";
     private String SELECT_ALL = "SELECT * FROM %s.%s";
     private String SELECT_BY_ID = "SELECT * FROM %s.%s WHERE id = ?;";
     private String DELETE_BY_ID = "DELETE FROM %s.%s WHERE id = ?;";
@@ -37,6 +39,10 @@ public abstract class DAO<E, K> implements InterfaceDAO <E, K> {
     public abstract String getInsertByIdQuery();
 
     public abstract String getUpdateQuery();
+
+    public String getTruncateTable() {
+        return TRUNCATE_TABLE;
+    }
 
     public String getSelectAllQuery() {
         return SELECT_ALL;
@@ -265,4 +271,12 @@ public abstract class DAO<E, K> implements InterfaceDAO <E, K> {
     }
 
 
+    void truncateTable(){
+        PreparedStatement statement = getPrepareStatement(getTruncateTable());
+        try {
+            statement.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }
