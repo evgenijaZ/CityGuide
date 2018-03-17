@@ -3,7 +3,6 @@ package edu.kpi.jee.labs.dao;
 import java.lang.reflect.Field;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLDataException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +14,7 @@ public abstract class DAO<E, K> implements InterfaceDAO <E, K> {
 
     private String SELECT_ALL = "SELECT * FROM %s.%s";
     private String SELECT_BY_ID = "SELECT * FROM %s.%s WHERE id = ?;";
-    private String DELETE_BY_ID = "DELETE * FROM %s.%s WHERE id = ?;";
+    private String DELETE_BY_ID = "DELETE FROM %s.%s WHERE id = ?;";
 
     private JDBCHandler handler;
     private String tableName;
@@ -29,7 +28,7 @@ public abstract class DAO<E, K> implements InterfaceDAO <E, K> {
 
     protected abstract Class <E> getEntityClass();
 
-    public abstract String[][] getMapping();
+    public abstract String[][] getNameMapping();
 
     public abstract String getInsertQuery();
 
@@ -54,7 +53,7 @@ public abstract class DAO<E, K> implements InterfaceDAO <E, K> {
         Object instance = null;
         try {
             instance = entityClass.newInstance();
-            for (String[] columnFieldPair : getMapping()) {
+            for (String[] columnFieldPair : (getNameMapping())) {
                 String fieldName = columnFieldPair[0];
                 String columnName = columnFieldPair[1];
 
@@ -73,12 +72,14 @@ public abstract class DAO<E, K> implements InterfaceDAO <E, K> {
                         break;
                     }
                     case "Double":
-                    case "double": {
-                        field.setDouble(instance, Double.parseDouble(value));
+                    case "double":
+                    case "Float":
+                    case "float": {
+                        field.setFloat(instance, Float.parseFloat(value));
                         break;
                     }
                     case "boolean":
-                    case"Boolean":{
+                    case "Boolean": {
                         field.setBoolean(instance, Boolean.getBoolean(value));
                         break;
                     }
@@ -95,11 +96,10 @@ public abstract class DAO<E, K> implements InterfaceDAO <E, K> {
     @SuppressWarnings("unchecked")
     public List <E> getAll() {
         List <E> entities = new ArrayList <>();
-        PreparedStatement statement = getPrepareStatement(SELECT_ALL);
+        PreparedStatement statement = getPrepareStatement(getSelectAllQuery());
         try {
             ResultSet resultSet = statement.executeQuery();
             while (resultSet.next()) {
-                // E entity = Specifics.getEntityFromResultSet(resultSet, tableName);
                 Object parsingSetResult = this.getEntityFromResultSet(resultSet);
                 if (parsingSetResult != null && (getEntityClass()).isInstance(parsingSetResult))
                     entities.add((E) parsingSetResult);
@@ -116,10 +116,10 @@ public abstract class DAO<E, K> implements InterfaceDAO <E, K> {
         boolean result = false;
         PreparedStatement statement = getPrepareStatement(getUpdateQuery());
         try {
-            statement = Specifics.prepareStatement(tableName, statement, entity);
+            statement = prepareStatement(statement, entity);
             result = statement != null && statement.execute();
             handler.closePrepareStatement(statement);
-        } catch (SQLException e) {
+        } catch (SQLException | IllegalAccessException | NoSuchFieldException e) {
             e.printStackTrace();
         }
         return result;
@@ -127,33 +127,33 @@ public abstract class DAO<E, K> implements InterfaceDAO <E, K> {
 
     public E getByKey(K key) {
         E entity = null;
-        PreparedStatement statement = getPrepareStatement(getSelectAllQuery());
+        PreparedStatement statement = getPrepareStatement(getSelectByIdQuery());
+        int idIndex = getNameMapping().length - 1;
         try {
-            statement.setObject(1, key);
-
+            statement = prepareStatementWithOneValue(statement, key, idIndex);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.getMetaData().getColumnCount() != 1)
-                throw new SQLDataException("Wrong number of result parameters");
-            if (resultSet.next()) {
-                Object parsingSetResult = this.getEntityFromResultSet(resultSet);
-                if (parsingSetResult != null && (getEntityClass()).isInstance(parsingSetResult))
-                    entity = (E) parsingSetResult;
-            }
+                if (resultSet.next()) {
+                    Object parsingSetResult = this.getEntityFromResultSet(resultSet);
+                    if (parsingSetResult != null && (getEntityClass()).isInstance(parsingSetResult))
+                        entity = ((E) parsingSetResult);
+                }
             handler.closePrepareStatement(statement);
-        } catch (SQLException e) {
+        } catch (SQLException | IllegalAccessException | NoSuchFieldException e) {
             e.printStackTrace();
         }
         return entity;
     }
 
-    public boolean delete(E entity) {
+    public boolean deleteByKey(K key) {
         boolean result = false;
         PreparedStatement statement = getPrepareStatement(getDeleteByIdQuery());
+        int idIndex = getNameMapping().length - 1;
         try {
-            statement.setObject(1, Specifics. <E, K>getPrimaryKey(tableName, entity));
+            statement = prepareStatementWithOneValue(statement, key, idIndex);
             result = statement.execute();
             handler.closePrepareStatement(statement);
-        } catch (SQLException e) {
+        } catch (SQLException | IllegalAccessException | NoSuchFieldException e) {
             e.printStackTrace();
         }
         return result;
@@ -161,27 +161,26 @@ public abstract class DAO<E, K> implements InterfaceDAO <E, K> {
 
     public boolean create(E entity) {
         boolean result = false;
-        boolean generateKey;
-        K key = Specifics. <E, K>getPrimaryKey(tableName, entity);
-        PreparedStatement statement;
-        if (key == null)
-            return false;
-        if (key.equals(-1))
-            generateKey = true;
-        else
-            generateKey = false;
-        statement = getPrepareStatement(getInsertQuery());
-        try {
-            Specifics.prepareStatement(tableName, statement, entity);
-            if (statement == null)
-                return false;
-            System.out.println(statement);
-            result = statement.execute();
+//        boolean generateKey;
+//        K key = Specifics. <E, K>getPrimaryKey(tableName, entity);
+//        PreparedStatement statement;
+//        if (key == null)
+//            return false;
+//        if (key.equals(-1))
+//            generateKey = true;
+//        else
+//            generateKey = false;
+//        statement = getPrepareStatement(getInsertQuery());
+//        try {
+//            Specifics.prepareStatement(tableName, statement, entity);
+//            if (statement == null)
+//                return false;
+//            System.out.println(statement);
+//            result = statement.execute();
 //
 //            if (generateKey) {
 //                try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
 //                    if (generatedKeys.next()) {
-                    if (generatedKeys.next()) {
 //                        key = (K) generatedKeys.getObject(1);
 //                        Specifics.setPrimaryKey(tableName, entity, key);
 //                    } else {
@@ -194,12 +193,66 @@ public abstract class DAO<E, K> implements InterfaceDAO <E, K> {
 //        } catch (SQLException e) {
 //            e.printStackTrace();
 //        }
-//        return result;
-        return true;
+        return result;
     }
 
     private PreparedStatement getPrepareStatement(String query) {
         return handler.getPrepareStatement(String.format(query, dbName, tableName));
     }
+
+    private PreparedStatement prepareStatement(PreparedStatement statement, E item) throws SQLException, NoSuchFieldException, IllegalAccessException {
+        int parametersCount = statement.getParameterMetaData().getParameterCount();
+        for (int i = 0; i < parametersCount; i++) {
+            Object value = getField(i).get(item);
+            statement = prepareStatementWithOneValue(statement, value, i);
+        }
+        return statement;
+    }
+
+    private String getFieldTypeName(int index) throws NoSuchFieldException {
+        Field field = getField(index);
+        field.setAccessible(true);
+        return field.getType().getSimpleName();
+    }
+
+    private Field getField(int index) throws NoSuchFieldException {
+        Class <?> entityClass = this.getEntityClass();
+        String[][] mapping = getNameMapping();
+
+        String fieldName = mapping[index][0];
+        return entityClass.getDeclaredField(fieldName);
+
+    }
+
+    private PreparedStatement prepareStatementWithOneValue(PreparedStatement statement, Object value, int fieldIndex) throws SQLException, NoSuchFieldException, IllegalAccessException {
+        String fieldType = getFieldTypeName(fieldIndex);
+        if (statement.getParameterMetaData().getParameterCount() < fieldIndex)
+            fieldIndex = 0;
+        switch (fieldType) {
+            case "String": {
+                statement.setString(fieldIndex + 1, value.toString());
+                break;
+            }
+            case "int":
+            case "Integer": {
+                statement.setInt(fieldIndex + 1, Integer.parseInt(value.toString()));
+                break;
+            }
+            case "Float":
+            case "float":
+            case "Double":
+            case "double": {
+                statement.setDouble(fieldIndex + 1, Double.parseDouble(value.toString()));
+                break;
+            }
+            case "boolean":
+            case "Boolean": {
+                statement.setBoolean(fieldIndex + 1, Boolean.getBoolean(value.toString()));
+                break;
+            }
+        }
+        return statement;
+    }
+
 
 }
