@@ -52,7 +52,6 @@ class JDBCHandler {
 
 
     void closePrepareStatement(PreparedStatement preparedStatement) {
-        System.out.println(preparedStatement);
         if (preparedStatement != null) {
             try {
                 preparedStatement.close();

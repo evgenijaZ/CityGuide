@@ -28,6 +28,8 @@ public abstract class DAO<E, K> implements InterfaceDAO <E, K> {
 
     protected abstract Class <E> getEntityClass();
 
+    protected abstract Class <K> getKeyClass();
+
     public abstract String[][] getNameMapping();
 
     public abstract String getInsertQuery();
@@ -48,6 +50,32 @@ public abstract class DAO<E, K> implements InterfaceDAO <E, K> {
         return DELETE_BY_ID;
     }
 
+    private void setFieldValue(Field field, Object instance, String value) throws IllegalAccessException {
+        String fieldType = field.getType().getSimpleName();
+        switch (fieldType) {
+            case "String": {
+                field.set(instance, value);
+                break;
+            }
+            case "int":
+            case "Integer": {
+                field.setInt(instance, Integer.parseInt(value));
+                break;
+            }
+            case "Double":
+            case "double":
+            case "Float":
+            case "float": {
+                field.setFloat(instance, Float.parseFloat(value));
+                break;
+            }
+            case "boolean":
+            case "Boolean": {
+                field.setBoolean(instance, Boolean.getBoolean(value));
+                break;
+            }
+        }
+    }
     private Object getEntityFromResultSet(ResultSet resultSet) {
         Class <?> entityClass = this.getEntityClass();
         Object instance = null;
@@ -60,31 +88,8 @@ public abstract class DAO<E, K> implements InterfaceDAO <E, K> {
                 Field field = entityClass.getDeclaredField(fieldName);
                 field.setAccessible(true);
                 String value = resultSet.getString(columnName);
-                String fieldType = field.getType().getSimpleName();
-                switch (fieldType) {
-                    case "String": {
-                        field.set(instance, value);
-                        break;
-                    }
-                    case "int":
-                    case "Integer": {
-                        field.setInt(instance, Integer.parseInt(value));
-                        break;
-                    }
-                    case "Double":
-                    case "double":
-                    case "Float":
-                    case "float": {
-                        field.setFloat(instance, Float.parseFloat(value));
-                        break;
-                    }
-                    case "boolean":
-                    case "Boolean": {
-                        field.setBoolean(instance, Boolean.getBoolean(value));
-                        break;
-                    }
-                }
 
+                setFieldValue(field ,instance, value);
             }
         } catch (NoSuchFieldException | InstantiationException | IllegalAccessException | SQLException e) {
             e.printStackTrace();
@@ -161,38 +166,41 @@ public abstract class DAO<E, K> implements InterfaceDAO <E, K> {
 
     public boolean create(E entity) {
         boolean result = false;
-//        boolean generateKey;
-//        K key = Specifics. <E, K>getPrimaryKey(tableName, entity);
-//        PreparedStatement statement;
-//        if (key == null)
-//            return false;
-//        if (key.equals(-1))
-//            generateKey = true;
-//        else
-//            generateKey = false;
-//        statement = getPrepareStatement(getInsertQuery());
-//        try {
-//            Specifics.prepareStatement(tableName, statement, entity);
-//            if (statement == null)
-//                return false;
-//            System.out.println(statement);
-//            result = statement.execute();
-//
-//            if (generateKey) {
-//                try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
-//                    if (generatedKeys.next()) {
-//                        key = (K) generatedKeys.getObject(1);
-//                        Specifics.setPrimaryKey(tableName, entity, key);
-//                    } else {
-//                        throw new SQLException("Creating " + tableName + " failed, no ID obtained.");
-//                    }
-//                }
-//            }
-//
-//            handler.closePrepareStatement(statement);
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
+        boolean generateKey;
+        try {
+            K key = null;
+            int keyIndex = getNameMapping().length - 1;
+            Field field = getField(keyIndex);
+            field.setAccessible(true);
+            Object value = field.get(entity);
+
+            if (value != null && getKeyClass().isInstance(value))
+                key = (K) value;
+
+            generateKey = (key == null) || key.equals(-1);
+            PreparedStatement statement;
+            if (generateKey)
+                statement = getPrepareStatement(getInsertQuery());
+            else statement = getPrepareStatement(getInsertByIdQuery());
+
+            statement = prepareStatement(statement, entity);
+            if (statement == null)
+                return false;
+            result = statement.execute();
+            if (generateKey) {
+                try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        String keyValue = generatedKeys.getString(1);
+                        setFieldValue(field, entity, keyValue);
+                    } else {
+                        throw new SQLException("Creating " + tableName + " failed, no ID obtained.");
+                    }
+                }
+            }
+            handler.closePrepareStatement(statement);
+        } catch (SQLException | NoSuchFieldException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
         return result;
     }
 
@@ -203,7 +211,9 @@ public abstract class DAO<E, K> implements InterfaceDAO <E, K> {
     private PreparedStatement prepareStatement(PreparedStatement statement, E item) throws SQLException, NoSuchFieldException, IllegalAccessException {
         int parametersCount = statement.getParameterMetaData().getParameterCount();
         for (int i = 0; i < parametersCount; i++) {
-            Object value = getField(i).get(item);
+            Field field = getField(i);
+            field.setAccessible(true);
+            Object value = field.get(item);
             statement = prepareStatementWithOneValue(statement, value, i);
         }
         return statement;
