@@ -1,9 +1,7 @@
 package edu.kpi.jee.labs.dao;
 
 import java.lang.reflect.Field;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,14 +10,14 @@ import java.util.List;
  */
 public abstract class DAO<E, K> implements InterfaceDAO <E, K> {
 
-    private String TRUNCATE_TABLE = "TRUNCATE TABLE %s.%s";
+    private String TRUNCATE_TABLE = "TRUNCATE TABLE %s.%s;";
     private String SELECT_ALL = "SELECT * FROM %s.%s";
-    private String SELECT_BY_ID = "SELECT * FROM %s.%s WHERE id = ?;";
-    private String DELETE_BY_ID = "DELETE FROM %s.%s WHERE id = ?;";
+    private String SELECT_BY_ID = "SELECT * FROM %s.%s WHERE %s = ?;";
+    private String DELETE_BY_ID = "DELETE FROM %s.%s WHERE %s = ?;";
 
     private JDBCHandler handler;
-    private String tableName;
-    private String dbName;
+    String tableName;
+    String dbName;
 
     DAO(String dbName, String tableName) {
         this.tableName = tableName;
@@ -40,19 +38,21 @@ public abstract class DAO<E, K> implements InterfaceDAO <E, K> {
     public abstract String getUpdateQuery();
 
     public String getTruncateTable() {
-        return TRUNCATE_TABLE;
+        return String.format(TRUNCATE_TABLE, dbName, tableName);
     }
 
     public String getSelectAllQuery() {
-        return SELECT_ALL;
+        return String.format(SELECT_ALL, dbName, tableName);
     }
 
     public String getSelectByIdQuery() {
-        return SELECT_BY_ID;
+        String keyFieldName = getNameMapping()[getNameMapping().length-1][1];
+        return String.format(SELECT_BY_ID,dbName,tableName,keyFieldName);
     }
 
     public String getDeleteByIdQuery() {
-        return DELETE_BY_ID;
+        String keyFieldName = getNameMapping()[getNameMapping().length-1][1];
+        return String.format(DELETE_BY_ID,dbName,tableName,keyFieldName);
     }
 
     private void setFieldValue(Field field, Object instance, String value) throws IllegalAccessException {
@@ -211,7 +211,7 @@ public abstract class DAO<E, K> implements InterfaceDAO <E, K> {
     }
 
     private PreparedStatement getPrepareStatement(String query) {
-        return handler.getPrepareStatement(String.format(query, dbName, tableName));
+        return handler.getPrepareStatement(query);
     }
 
     private PreparedStatement prepareStatement(PreparedStatement statement, E item) throws SQLException, NoSuchFieldException, IllegalAccessException {
@@ -272,9 +272,14 @@ public abstract class DAO<E, K> implements InterfaceDAO <E, K> {
 
 
     void truncateTable() {
-        PreparedStatement statement = getPrepareStatement(getTruncateTable());
+        Statement statement;
         try {
-            statement.execute();
+            statement = handler.getStatement();
+            statement.addBatch("SET FOREIGN_KEY_CHECKS = 0");
+            statement.addBatch(String.format(getTruncateTable(), dbName, tableName));
+            statement.addBatch("SET FOREIGN_KEY_CHECKS = 1");
+            statement.executeBatch();
+            statement.getConnection().close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
