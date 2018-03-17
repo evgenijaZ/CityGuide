@@ -2,6 +2,9 @@ package edu.kpi.jee.labs.dao;
 
 import edu.kpi.jee.labs.Entities.Place;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author Yevheniia Zubrych on 16.03.2018.
  */
@@ -32,18 +35,18 @@ public class PlaceDAO extends DAO <Place, Integer> {
 
     @Override
     public String getInsertQuery() {
-        return String.format(INSERT,dbName, tableName, nameMapping[0][1],nameMapping[1][1],nameMapping[2][1],nameMapping[3][1] );
+        return String.format(INSERT,makeFormatArgs(getFieldCount()-1));
 
     }
 
     @Override
     public String getInsertByIdQuery() {
-        return String.format(INSERT_BY_ID, dbName, tableName,nameMapping[0][1],nameMapping[1][1],nameMapping[2][1],nameMapping[3][1],nameMapping[4][1] );
+        return String.format(INSERT_BY_ID, makeFormatArgs(getFieldCount()));
     }
 
     @Override
     public String getUpdateQuery() {
-        return String.format(UPDATE, dbName, tableName,nameMapping[0][1],nameMapping[1][1],nameMapping[2][1],nameMapping[3][1],nameMapping[4][1] );
+        return String.format(UPDATE, makeFormatArgs(getFieldCount()));
 
     }
 }

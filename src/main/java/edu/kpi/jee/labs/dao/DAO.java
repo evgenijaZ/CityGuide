@@ -55,6 +55,115 @@ public abstract class DAO<E, K> implements InterfaceDAO <E, K> {
         return String.format(DELETE_BY_ID,dbName,tableName,keyFieldName);
     }
 
+    @SuppressWarnings("unchecked")
+    public List <E> getAll() {
+        List <E> entities = new ArrayList <>();
+        PreparedStatement statement = getPrepareStatement(getSelectAllQuery());
+        try {
+            ResultSet resultSet = statement.executeQuery();
+            while (resultSet.next()) {
+                Object parsingSetResult = this.getEntityFromResultSet(resultSet);
+                if (parsingSetResult != null && (getEntityClass()).isInstance(parsingSetResult))
+                    entities.add((E) parsingSetResult);
+            }
+            handler.closePrepareStatement(statement);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return entities;
+    }
+
+
+    public boolean update(E entity) {
+        boolean result = false;
+        PreparedStatement statement = getPrepareStatement(getUpdateQuery());
+        try {
+            statement = prepareStatement(statement, entity);
+            result = statement != null && statement.execute();
+            handler.closePrepareStatement(statement);
+        } catch (SQLException | IllegalAccessException | NoSuchFieldException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+
+    @SuppressWarnings("unchecked")
+    public E getByKey(K key) {
+        E entity = null;
+        PreparedStatement statement = getPrepareStatement(getSelectByIdQuery());
+        int idIndex = getFieldCount();
+        try {
+            statement = prepareStatementWithOneValue(statement, key, idIndex);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.getMetaData().getColumnCount() != 1)
+                if (resultSet.next()) {
+                    Object parsingSetResult = this.getEntityFromResultSet(resultSet);
+                    if (parsingSetResult != null && (getEntityClass()).isInstance(parsingSetResult))
+                        entity = ((E) parsingSetResult);
+                }
+            handler.closePrepareStatement(statement);
+        } catch (SQLException | IllegalAccessException | NoSuchFieldException e) {
+            e.printStackTrace();
+        }
+        return entity;
+    }
+
+    public boolean deleteByKey(K key) {
+        boolean result = false;
+        PreparedStatement statement = getPrepareStatement(getDeleteByIdQuery());
+        int idIndex = getFieldCount();
+        try {
+            statement = prepareStatementWithOneValue(statement, key, idIndex);
+            result = statement.execute();
+            handler.closePrepareStatement(statement);
+        } catch (SQLException | IllegalAccessException | NoSuchFieldException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    @SuppressWarnings("unchecked")
+    public boolean create(E entity) {
+        boolean result = false;
+        boolean generateKey;
+        try {
+            K key = null;
+            int keyIndex = getFieldCount();
+            Field field = getField(keyIndex);
+            field.setAccessible(true);
+            Object value = field.get(entity);
+
+            if (value != null && getKeyClass().isInstance(value))
+                key = (K) value;
+
+            generateKey = (key == null) || key.equals(-1);
+            PreparedStatement statement;
+            if (generateKey)
+                statement = getPrepareStatement(getInsertQuery());
+            else statement = getPrepareStatement(getInsertByIdQuery());
+
+            statement = prepareStatement(statement, entity);
+            if (statement == null)
+                return false;
+            result = statement.execute();
+            if (generateKey) {
+                try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+                    if (generatedKeys.next()) {
+                        String keyValue = generatedKeys.getString(1);
+                        setFieldValue(field, entity, keyValue);
+                    } else {
+                        throw new SQLException("Creating " + tableName + " failed, no ID obtained.");
+                    }
+                }
+            }
+            handler.closePrepareStatement(statement);
+        } catch (SQLException | NoSuchFieldException | IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
     private void setFieldValue(Field field, Object instance, String value) throws IllegalAccessException {
         String fieldType = field.getType().getSimpleName();
         switch (fieldType) {
@@ -104,115 +213,6 @@ public abstract class DAO<E, K> implements InterfaceDAO <E, K> {
         return instance;
     }
 
-    @SuppressWarnings("unchecked")
-    public List <E> getAll() {
-        List <E> entities = new ArrayList <>();
-        PreparedStatement statement = getPrepareStatement(getSelectAllQuery());
-        try {
-            ResultSet resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-                Object parsingSetResult = this.getEntityFromResultSet(resultSet);
-                if (parsingSetResult != null && (getEntityClass()).isInstance(parsingSetResult))
-                    entities.add((E) parsingSetResult);
-            }
-            handler.closePrepareStatement(statement);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return entities;
-    }
-
-
-    public boolean update(E entity) {
-        boolean result = false;
-        PreparedStatement statement = getPrepareStatement(getUpdateQuery());
-        try {
-            statement = prepareStatement(statement, entity);
-            result = statement != null && statement.execute();
-            handler.closePrepareStatement(statement);
-        } catch (SQLException | IllegalAccessException | NoSuchFieldException e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
-
-
-    @SuppressWarnings("unchecked")
-    public E getByKey(K key) {
-        E entity = null;
-        PreparedStatement statement = getPrepareStatement(getSelectByIdQuery());
-        int idIndex = getNameMapping().length - 1;
-        try {
-            statement = prepareStatementWithOneValue(statement, key, idIndex);
-            ResultSet resultSet = statement.executeQuery();
-            if (resultSet.getMetaData().getColumnCount() != 1)
-                if (resultSet.next()) {
-                    Object parsingSetResult = this.getEntityFromResultSet(resultSet);
-                    if (parsingSetResult != null && (getEntityClass()).isInstance(parsingSetResult))
-                        entity = ((E) parsingSetResult);
-                }
-            handler.closePrepareStatement(statement);
-        } catch (SQLException | IllegalAccessException | NoSuchFieldException e) {
-            e.printStackTrace();
-        }
-        return entity;
-    }
-
-    public boolean deleteByKey(K key) {
-        boolean result = false;
-        PreparedStatement statement = getPrepareStatement(getDeleteByIdQuery());
-        int idIndex = getNameMapping().length - 1;
-        try {
-            statement = prepareStatementWithOneValue(statement, key, idIndex);
-            result = statement.execute();
-            handler.closePrepareStatement(statement);
-        } catch (SQLException | IllegalAccessException | NoSuchFieldException e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
-
-    @SuppressWarnings("unchecked")
-    public boolean create(E entity) {
-        boolean result = false;
-        boolean generateKey;
-        try {
-            K key = null;
-            int keyIndex = getNameMapping().length - 1;
-            Field field = getField(keyIndex);
-            field.setAccessible(true);
-            Object value = field.get(entity);
-
-            if (value != null && getKeyClass().isInstance(value))
-                key = (K) value;
-
-            generateKey = (key == null) || key.equals(-1);
-            PreparedStatement statement;
-            if (generateKey)
-                statement = getPrepareStatement(getInsertQuery());
-            else statement = getPrepareStatement(getInsertByIdQuery());
-
-            statement = prepareStatement(statement, entity);
-            if (statement == null)
-                return false;
-            result = statement.execute();
-            if (generateKey) {
-                try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
-                    if (generatedKeys.next()) {
-                        String keyValue = generatedKeys.getString(1);
-                        setFieldValue(field, entity, keyValue);
-                    } else {
-                        throw new SQLException("Creating " + tableName + " failed, no ID obtained.");
-                    }
-                }
-            }
-            handler.closePrepareStatement(statement);
-        } catch (SQLException | NoSuchFieldException | IllegalAccessException e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
-
     private PreparedStatement getPrepareStatement(String query) {
         return handler.getPrepareStatement(query);
     }
@@ -226,6 +226,10 @@ public abstract class DAO<E, K> implements InterfaceDAO <E, K> {
             statement = prepareStatementWithOneValue(statement, value, i);
         }
         return statement;
+    }
+
+    int getFieldCount(){
+        return getNameMapping().length-1;
     }
 
     private String getFieldTypeName(int index) throws NoSuchFieldException {
@@ -286,5 +290,16 @@ public abstract class DAO<E, K> implements InterfaceDAO <E, K> {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    Object[] makeFormatArgs(int count){
+        List<String> args = new ArrayList <>();
+        args.add(dbName);
+        args.add(tableName);
+        String[][]nameMapping = getNameMapping();
+        for(int i=0; i<count; i++){
+            args.add(nameMapping[i][1]);
+        }
+        return args.toArray();
     }
 }
