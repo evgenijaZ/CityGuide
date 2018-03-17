@@ -13,7 +13,7 @@ public interface InterfaceDAO<E, K> {
 
     E getByKey(K key);
 
-    boolean delete(E entity);
+    boolean deleteByKey(K key);
 
     boolean create(E entity);
 
