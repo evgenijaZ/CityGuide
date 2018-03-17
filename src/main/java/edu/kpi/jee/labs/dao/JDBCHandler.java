@@ -27,13 +27,23 @@ class JDBCHandler {
         return null;
     }
 
-    private void closeConnection(Connection connection) {
+    void closeConnection(Connection connection) {
         try {
             if (connection != null && !connection.isClosed())
                 connection.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    Statement getStatement(){
+        try{
+            Connection connection = openConnection();
+            return connection.createStatement();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     PreparedStatement getPrepareStatement(String sql) {
@@ -52,6 +62,7 @@ class JDBCHandler {
 
 
     void closePrepareStatement(PreparedStatement preparedStatement) {
+        System.out.println(preparedStatement);
         if (preparedStatement != null) {
             try {
                 preparedStatement.close();
@@ -60,4 +71,5 @@ class JDBCHandler {
             }
         }
     }
+
 }
