@@ -4,7 +4,6 @@ import java.lang.reflect.Field;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -82,6 +81,7 @@ public abstract class DAO<E, K> implements InterfaceDAO <E, K> {
             }
         }
     }
+
     private Object getEntityFromResultSet(ResultSet resultSet) {
         Class <?> entityClass = this.getEntityClass();
         Object instance = null;
@@ -95,7 +95,7 @@ public abstract class DAO<E, K> implements InterfaceDAO <E, K> {
                 field.setAccessible(true);
                 String value = resultSet.getString(columnName);
 
-                setFieldValue(field ,instance, value);
+                setFieldValue(field, instance, value);
             }
         } catch (NoSuchFieldException | InstantiationException | IllegalAccessException | SQLException e) {
             e.printStackTrace();
@@ -271,7 +271,7 @@ public abstract class DAO<E, K> implements InterfaceDAO <E, K> {
     }
 
 
-    void truncateTable(){
+    void truncateTable() {
         PreparedStatement statement = getPrepareStatement(getTruncateTable());
         try {
             statement.execute();
