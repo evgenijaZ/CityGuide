@@ -9,22 +9,23 @@ public class Place {
     private int id;
     private String name;
     private String address;
-    private double latitude;
-    private double longitude;
+    private float latitude;
+    private float longitude;
     private List <Rating> ratings;
     private List <Category> categories;
 
     public Place() {
     }
 
-    public Place(String name, String address, double latitude, double longitude) {
+    public Place(String name, String address, float latitude, float longitude) {
+        this.id = -1;
         this.name = name;
         this.address = address;
         this.latitude = latitude;
         this.longitude = longitude;
     }
 
-    public Place(int id, String name, String address, double latitude, double longitude) {
+    public Place(int id, String name, String address, float latitude, float longitude) {
         this.id = id;
         this.name = name;
         this.address = address;
@@ -32,7 +33,7 @@ public class Place {
         this.longitude = longitude;
     }
 
-    public Place(int id, String name, String address, double latitude, double longitude, List <Rating> ratings, List <Category> categories) {
+    public Place(int id, String name, String address, float latitude, float longitude, List <Rating> ratings, List <Category> categories) {
         this.id = id;
         this.name = name;
         this.address = address;
@@ -54,7 +55,7 @@ public class Place {
         return resultRating;
     }
 
-    public Integer getId() {
+    public int getId() {
         return id;
     }
 
@@ -78,19 +79,19 @@ public class Place {
         this.address = address;
     }
 
-    public double getLatitude() {
+    public float getLatitude() {
         return latitude;
     }
 
-    public void setLatitude(double latitude) {
+    public void setLatitude(float latitude) {
         this.latitude = latitude;
     }
 
-    public double getLongitude() {
+    public float getLongitude() {
         return longitude;
     }
 
-    public void setLongitude(double longitude) {
+    public void setLongitude(float longitude) {
         this.longitude = longitude;
     }
 
@@ -120,7 +121,6 @@ public class Place {
         Place place = (Place) obj;
         return (Math.abs(this.latitude - place.getLatitude()) < 0.00001 &&
                 Math.abs(this.longitude - place.getLongitude()) < 0.00001 &&
-                Math.abs(this.getRating() - place.getRating()) < 0.001 &&
                 this.name.equals(place.getName()) &&
                 this.address.equals(place.getAddress()));
     }
