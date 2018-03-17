@@ -177,23 +177,25 @@ public abstract class DAO<E, K> implements InterfaceDAO <E, K> {
                 return false;
             System.out.println(statement);
             result = statement.execute();
-
-            if (generateKey) {
-                try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+//
+//            if (generateKey) {
+//                try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+//                    if (generatedKeys.next()) {
                     if (generatedKeys.next()) {
-                        key = (K) generatedKeys.getObject(1);
-                        Specifics.setPrimaryKey(tableName, entity, key);
-                    } else {
-                        throw new SQLException("Creating " + tableName + " failed, no ID obtained.");
-                    }
-                }
-            }
-
-            handler.closePrepareStatement(statement);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return result;
+//                        key = (K) generatedKeys.getObject(1);
+//                        Specifics.setPrimaryKey(tableName, entity, key);
+//                    } else {
+//                        throw new SQLException("Creating " + tableName + " failed, no ID obtained.");
+//                    }
+//                }
+//            }
+//
+//            handler.closePrepareStatement(statement);
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+//        return result;
+        return true;
     }
 
     private PreparedStatement getPrepareStatement(String query) {
