@@ -37,20 +37,20 @@ public abstract class DAO<E, K> implements InterfaceDAO <E, K> {
 
     public abstract String getUpdateQuery();
 
-    public String getTruncateTable() {
+    private String getTruncateTable() {
         return String.format(TRUNCATE_TABLE, dbName, tableName);
     }
 
-    public String getSelectAllQuery() {
+    private String getSelectAllQuery() {
         return String.format(SELECT_ALL, dbName, tableName);
     }
 
-    public String getSelectByIdQuery() {
+    private String getSelectByIdQuery() {
         String keyFieldName = getNameMapping()[getNameMapping().length-1][1];
         return String.format(SELECT_BY_ID,dbName,tableName,keyFieldName);
     }
 
-    public String getDeleteByIdQuery() {
+    private String getDeleteByIdQuery() {
         String keyFieldName = getNameMapping()[getNameMapping().length-1][1];
         return String.format(DELETE_BY_ID,dbName,tableName,keyFieldName);
     }
@@ -136,6 +136,8 @@ public abstract class DAO<E, K> implements InterfaceDAO <E, K> {
         return result;
     }
 
+
+    @SuppressWarnings("unchecked")
     public E getByKey(K key) {
         E entity = null;
         PreparedStatement statement = getPrepareStatement(getSelectByIdQuery());
@@ -170,6 +172,7 @@ public abstract class DAO<E, K> implements InterfaceDAO <E, K> {
         return result;
     }
 
+    @SuppressWarnings("unchecked")
     public boolean create(E entity) {
         boolean result = false;
         boolean generateKey;
