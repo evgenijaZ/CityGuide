@@ -6,11 +6,11 @@ import edu.kpi.jee.labs.Entities.Place;
  * @author Yevheniia Zubrych on 16.03.2018.
  */
 public class PlaceDAO extends DAO <Place, Integer> {
-    private String INSERT = "INSERT INTO %s.%s (name,address,lat,lng) VALUES (?, ?, ?, ?);";
-    private String INSERT_BY_ID = "INSERT INTO %s.%s (name,address,lat,lng,id) VALUES (?, ?, ?, ?,?);";
-    private String UPDATE = "UPDATE %s.%s SET name=?,address=?,lat=?,lng=? WHERE id=?;";
+    private String INSERT = "INSERT INTO %s.%s (%s, %s, %s, %s) VALUES (?, ?, ?, ?);";
+    private String INSERT_BY_ID = "INSERT INTO %s.%s (%s, %s, %s, %s, %s) VALUES (?, ?, ?, ?, ?);";
+    private String UPDATE = "UPDATE %s.%s SET %s=?,%s=?,%s=?,%s=? WHERE %s=?;";
 
-    private String[][] nameMapping = {{"name", "name"}, {"address", "address"}, {"latitude", "lat"}, {"longitude", "lng"},{"id", "id"}};
+    private String[][] nameMapping = {{"name", "p_name"}, {"address", "p_address"}, {"latitude", "p_lat"}, {"longitude", "p_lng"},{"id", "p_id"}};
     public PlaceDAO(String dbName, String tableName) {
         super(dbName, tableName);
     }
@@ -32,16 +32,18 @@ public class PlaceDAO extends DAO <Place, Integer> {
 
     @Override
     public String getInsertQuery() {
-        return INSERT;
+        return String.format(INSERT,dbName, tableName, nameMapping[0][1],nameMapping[1][1],nameMapping[2][1],nameMapping[3][1] );
+
     }
 
     @Override
     public String getInsertByIdQuery() {
-        return INSERT_BY_ID;
+        return String.format(INSERT_BY_ID, dbName, tableName,nameMapping[0][1],nameMapping[1][1],nameMapping[2][1],nameMapping[3][1],nameMapping[4][1] );
     }
 
     @Override
     public String getUpdateQuery() {
-        return UPDATE;
+        return String.format(UPDATE, dbName, tableName,nameMapping[0][1],nameMapping[1][1],nameMapping[2][1],nameMapping[3][1],nameMapping[4][1] );
+
     }
 }
