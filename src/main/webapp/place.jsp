@@ -13,8 +13,9 @@
     <%=place.toString()%>
 </h5>
 <%
-    }else {%>
-<h>There is no places with id <%=request.getParameter("place_id")%> </h>
+} else {%>
+<h>There is no places with id <%=request.getParameter("place_id")%>
+</h>
 <%
     }
 %>

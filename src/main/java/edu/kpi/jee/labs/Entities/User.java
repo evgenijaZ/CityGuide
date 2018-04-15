@@ -1,4 +1,4 @@
-package edu.kpi.jee.labs.Entities;
+package edu.kpi.jee.labs.entities;
 
 import java.util.List;
 

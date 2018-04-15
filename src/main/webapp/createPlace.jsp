@@ -1,4 +1,3 @@
-<%@ page import="edu.kpi.jee.labs.entities.Place" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
@@ -7,14 +6,14 @@
 <body>
 <%
     int id = Integer.parseInt(request.getParameter("new_id"));
-    Boolean result =(Boolean)request.getAttribute("result");
+    Boolean result = (Boolean) request.getAttribute("result");
     if (result) {
 %>
 <h5>
-   Place was successfully created with id <%=id%>.
+    Place was successfully created with id <%=id%>.
 </h5>
 <%
-    }else {%>
+} else {%>
 <h5>Cannot create place.</h5>
 <%
     }

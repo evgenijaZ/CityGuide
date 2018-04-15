@@ -11,7 +11,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.List;
 
 /**
@@ -25,10 +24,11 @@ public class PlaceListServlet extends HttpServlet {
     public void init() throws ServletException {
         dao = new PlaceDAO("attractions", "place");
     }
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         List <Place> places = dao.getAll();
-        req.setAttribute("places",places);
+        req.setAttribute("places", places);
         RequestDispatcher requestDispatcher = req.getRequestDispatcher("placeList.jsp");
         requestDispatcher.forward(req, resp);
     }

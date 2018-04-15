@@ -38,7 +38,7 @@ public class CreatePlaceServlet extends HttpServlet {
         Place place = new Place(name, address, latitude, longitude);
         boolean result = dao.create(place);
         req.setAttribute("result", result);
-        if(result)
+        if (result)
             req.setAttribute("new_id", place.getId());
         doGet(req, resp);
     }

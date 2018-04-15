@@ -20,7 +20,7 @@ class JDBCHandler {
     private Connection openConnection() {
         try {
             Class.forName("com.mysql.jdbc.Driver");
-            return DriverManager.getConnection(URL + dbName+parameters, USER, PASS);
+            return DriverManager.getConnection(URL + dbName + parameters, USER, PASS);
         } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();
         }
@@ -36,8 +36,8 @@ class JDBCHandler {
         }
     }
 
-    Statement getStatement(){
-        try{
+    Statement getStatement() {
+        try {
             Connection connection = openConnection();
             return connection.createStatement();
         } catch (SQLException e) {

@@ -61,7 +61,7 @@
 
 <form id="getByIdForm" style="display:none" action="/place" method="get">
     Please enter a place id <br>
-        <input type="text" name="place_id" size="20px">
+    <input type="text" name="place_id" size="20px">
     <input type="submit" value="submit">
 </form>
 

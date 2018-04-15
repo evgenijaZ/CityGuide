@@ -21,8 +21,8 @@
     <li><%= place.getAddress() %>
     </li>
     <%
+            }
         }
-    }
     %>
 </ul>
 <a href="/index">BACK</a>

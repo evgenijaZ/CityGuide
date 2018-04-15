@@ -10,7 +10,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.List;
 
 /**
  * @author Yevheniia Zubrych on 01.04.2018.
@@ -23,11 +22,12 @@ public class GetPlaceServlet extends HttpServlet {
     public void init() throws ServletException {
         dao = new PlaceDAO("attractions", "place");
     }
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         int id = Integer.parseInt(req.getParameter("place_id"));
         Place place = dao.getByKey(id);
-        req.setAttribute("place",place);
+        req.setAttribute("place", place);
         RequestDispatcher requestDispatcher = req.getRequestDispatcher("place.jsp");
         requestDispatcher.forward(req, resp);
     }

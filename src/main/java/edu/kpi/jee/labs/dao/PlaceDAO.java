@@ -31,7 +31,7 @@ public class PlaceDAO extends DAO <Place, Integer> {
     }
 
 
-    public List<Place> getByName(String name) {
-        return super.getAllByFilter("p_name = "+name);
+    public List <Place> getByName(String name) {
+        return super.getAllByFilter("p_name = " + name);
     }
 }

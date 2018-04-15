@@ -1,4 +1,4 @@
-package edu.kpi.jee.labs.Entities;
+package edu.kpi.jee.labs.entities;
 
 import java.util.List;
 
@@ -8,13 +8,13 @@ import java.util.List;
 public class Category {
     private int id;
     private String name;
-    private List <Place> places;
+    private List <edu.kpi.jee.labs.entities.Place> places;
 
-    public Category(String name){
+    public Category(String name) {
         this.name = name;
     }
 
-    public Category(String name, List <Place> places) {
+    public Category(String name, List <edu.kpi.jee.labs.entities.Place> places) {
         this.name = name;
         this.places = places;
     }
@@ -24,13 +24,13 @@ public class Category {
         this.name = name;
     }
 
-    public Category(int id, String name, List <Place> places) {
+    public Category(int id, String name, List <edu.kpi.jee.labs.entities.Place> places) {
         this.id = id;
         this.name = name;
         this.places = places;
     }
 
-    public void addPlace(Place place){
+    public void addPlace(edu.kpi.jee.labs.entities.Place place) {
         places.add(place);
     }
 
@@ -50,11 +50,11 @@ public class Category {
         this.name = name;
     }
 
-    public List <Place> getPlaces() {
+    public List <edu.kpi.jee.labs.entities.Place> getPlaces() {
         return places;
     }
 
-    public void setPlaces(List <Place> places) {
+    public void setPlaces(List <edu.kpi.jee.labs.entities.Place> places) {
         this.places = places;
     }
 }

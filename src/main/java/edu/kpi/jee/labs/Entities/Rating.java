@@ -1,24 +1,24 @@
-package edu.kpi.jee.labs.Entities;
+package edu.kpi.jee.labs.entities;
 
 /**
  * @author Yevheniia Zubrych on 15.03.2018.
  */
 public class Rating {
-    private User user;
-    private Place place;
+    private edu.kpi.jee.labs.entities.User user;
+    private edu.kpi.jee.labs.entities.Place place;
     private float value;
 
-    public Rating(User user, Place place, float value) {
+    public Rating(edu.kpi.jee.labs.entities.User user, edu.kpi.jee.labs.entities.Place place, float value) {
         this.user = user;
         this.place = place;
         this.value = value;
     }
 
-    public User getUser() {
+    public edu.kpi.jee.labs.entities.User getUser() {
         return user;
     }
 
-    public Place getPlace() {
+    public edu.kpi.jee.labs.entities.Place getPlace() {
         return place;
     }
 

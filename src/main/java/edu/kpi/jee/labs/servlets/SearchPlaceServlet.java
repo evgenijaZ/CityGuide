@@ -23,11 +23,12 @@ public class SearchPlaceServlet extends HttpServlet {
     public void init() throws ServletException {
         dao = new PlaceDAO("attractions", "place");
     }
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String name = req.getParameter("place_name");
-        List<Place> places = dao.getByName(name);
-        req.setAttribute("places",places);
+        List <Place> places = dao.getByName(name);
+        req.setAttribute("places", places);
         RequestDispatcher requestDispatcher = req.getRequestDispatcher("searchPlaces.jsp");
         requestDispatcher.forward(req, resp);
     }
