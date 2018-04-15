@@ -1,7 +1,10 @@
 package edu.kpi.jee.labs.dao;
 
 import java.lang.reflect.Field;
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,14 +13,13 @@ import java.util.List;
  */
 public abstract class DAO<E, K> implements InterfaceDAO <E, K> {
 
+    String tableName;
+    String dbName;
     private String TRUNCATE_TABLE = "TRUNCATE TABLE %s.%s;";
     private String SELECT_ALL = "SELECT * FROM %s.%s";
     private String SELECT_BY_ID = "SELECT * FROM %s.%s WHERE %s = ?;";
     private String DELETE_BY_ID = "DELETE FROM %s.%s WHERE %s = ?;";
-
     private JDBCHandler handler;
-    String tableName;
-    String dbName;
 
     DAO(String dbName, String tableName) {
         this.tableName = tableName;
@@ -31,11 +33,45 @@ public abstract class DAO<E, K> implements InterfaceDAO <E, K> {
 
     public abstract String[][] getNameMapping();
 
-    public abstract String getInsertQuery();
+    String getUpdateQuery() {
+        //"UPDATE %s.%s SET %s=?, ... %s=? WHERE %s=?"
+        StringBuilder query = new StringBuilder("UPDATE %s.%s SET ");
+        int colCount = getFieldCount() - 1;
+        for (int i = 0; i < colCount; i++) {
+            query.append("%s=? ,");
+        }
+        query.deleteCharAt(query.lastIndexOf(","));
+        query.append("WHERE %s=?;");
+        return String.format(query.toString(), makeFormatArgs(colCount + 1, getNameMapping()));
+    }
 
-    public abstract String getInsertByIdQuery();
+    String getInsertByIdQuery() {
+        int colCount = getFieldCount();
+        return String.format(makeInsertQuery(colCount), makeFormatArgs(colCount, getNameMapping()));
 
-    public abstract String getUpdateQuery();
+    }
+
+    String getInsertQuery() {
+        int colCount = getFieldCount() - 1;
+        return String.format(makeInsertQuery(colCount), makeFormatArgs(colCount, getNameMapping()));
+    }
+
+    String makeInsertQuery(int count) {
+        //"INSERT INTO %s.%s (%s, ... %s) VALUES (?, ... ?);";
+        StringBuilder query = new StringBuilder("INSERT INTO %s.%s (");
+        for (int i = 0; i < count; i++) {
+            query.append("%s, ");
+        }
+        query.deleteCharAt(query.lastIndexOf(","));
+        query.append(") VALUES (");
+        for (int i = 0; i < count; i++) {
+            query.append("?, ");
+        }
+        query.deleteCharAt(query.lastIndexOf(","));
+        query.append(");");
+        return query.toString();
+    }
+
 
     private String getTruncateTable() {
         return String.format(TRUNCATE_TABLE, dbName, tableName);
@@ -46,17 +82,26 @@ public abstract class DAO<E, K> implements InterfaceDAO <E, K> {
     }
 
     private String getSelectByIdQuery() {
-        String keyFieldName = getNameMapping()[getNameMapping().length-1][1];
-        return String.format(SELECT_BY_ID,dbName,tableName,keyFieldName);
+        String keyFieldName = getNameMapping()[getNameMapping().length - 1][1];
+        return String.format(SELECT_BY_ID, dbName, tableName, keyFieldName);
     }
 
     private String getDeleteByIdQuery() {
-        String keyFieldName = getNameMapping()[getNameMapping().length-1][1];
-        return String.format(DELETE_BY_ID,dbName,tableName,keyFieldName);
+        String keyFieldName = getNameMapping()[getNameMapping().length - 1][1];
+        return String.format(DELETE_BY_ID, dbName, tableName, keyFieldName);
+    }
+
+
+    public List <E> getAll() {
+        return getAllByFilter("");
     }
 
     @SuppressWarnings("unchecked")
-    public List <E> getAll() {
+    protected List <E> getAllByFilter(String filter) {
+        String query;
+        if (filter != null && !filter.isEmpty()) query = getSelectAllQuery() + " WHERE " + filter;
+        else query = getSelectAllQuery();
+
         List <E> entities = new ArrayList <>();
         PreparedStatement statement = getPrepareStatement(getSelectAllQuery());
         try {
@@ -92,7 +137,7 @@ public abstract class DAO<E, K> implements InterfaceDAO <E, K> {
     public E getByKey(K key) {
         E entity = null;
         PreparedStatement statement = getPrepareStatement(getSelectByIdQuery());
-        int idIndex = getFieldCount();
+        int idIndex = getFieldCount() - 1;
         try {
             statement = prepareStatementWithOneValue(statement, key, idIndex);
             ResultSet resultSet = statement.executeQuery();
@@ -112,7 +157,7 @@ public abstract class DAO<E, K> implements InterfaceDAO <E, K> {
     public boolean deleteByKey(K key) {
         boolean result = false;
         PreparedStatement statement = getPrepareStatement(getDeleteByIdQuery());
-        int idIndex = getFieldCount();
+        int idIndex = getFieldCount() - 1;
         try {
             statement = prepareStatementWithOneValue(statement, key, idIndex);
             result = statement.execute();
@@ -129,7 +174,7 @@ public abstract class DAO<E, K> implements InterfaceDAO <E, K> {
         boolean generateKey;
         try {
             K key = null;
-            int keyIndex = getFieldCount();
+            int keyIndex = getFieldCount() - 1;
             Field field = getField(keyIndex);
             field.setAccessible(true);
             Object value = field.get(entity);
@@ -228,8 +273,8 @@ public abstract class DAO<E, K> implements InterfaceDAO <E, K> {
         return statement;
     }
 
-    int getFieldCount(){
-        return getNameMapping().length-1;
+    int getFieldCount() {
+        return getNameMapping().length;
     }
 
     private String getFieldTypeName(int index) throws NoSuchFieldException {
@@ -292,12 +337,22 @@ public abstract class DAO<E, K> implements InterfaceDAO <E, K> {
         }
     }
 
-    Object[] makeFormatArgs(int count){
-        List<String> args = new ArrayList <>();
+    Object[] makeFormatArgs(int count) {
+        List <String> args = new ArrayList <>();
         args.add(dbName);
         args.add(tableName);
-        String[][]nameMapping = getNameMapping();
-        for(int i=0; i<count; i++){
+        String[][] nameMapping = getNameMapping();
+        for (int i = 0; i < count; i++) {
+            args.add(nameMapping[i][1]);
+        }
+        return args.toArray();
+    }
+
+    Object[] makeFormatArgs(int count, String[][] nameMapping) {
+        List <String> args = new ArrayList <>();
+        args.add(dbName);
+        args.add(tableName);
+        for (int i = 0; i < count; i++) {
             args.add(nameMapping[i][1]);
         }
         return args.toArray();

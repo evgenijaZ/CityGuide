@@ -8,11 +8,10 @@ import java.sql.*;
 class JDBCHandler {
 
     private final String URL = "jdbc:mysql://localhost:3306/";
-    private final String parameters = "?useUnicode=true&useSSL=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
+    private final String parameters = "?useUnicode=true&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC        ";
     private final String USER = "root";
     private final String PASS = "root";
     private String dbName;
-
 
     JDBCHandler(String dbName) {
         this.dbName = dbName;
@@ -20,8 +19,9 @@ class JDBCHandler {
 
     private Connection openConnection() {
         try {
-            return DriverManager.getConnection(URL + dbName + parameters, USER, PASS);
-        } catch (SQLException e) {
+            Class.forName("com.mysql.jdbc.Driver");
+            return DriverManager.getConnection(URL + dbName+parameters, USER, PASS);
+        } catch (SQLException | ClassNotFoundException e) {
             e.printStackTrace();
         }
         return null;

@@ -3,3 +3,7 @@
 *.iws
 /log/
 /target/
+*.mwb
+*.mwb.bak
+/out/
+/docs/

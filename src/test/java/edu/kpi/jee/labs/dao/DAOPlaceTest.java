@@ -1,6 +1,6 @@
 package edu.kpi.jee.labs.dao;
 
-import edu.kpi.jee.labs.Entities.Place;
+import edu.kpi.jee.labs.entities.Place;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -25,7 +25,7 @@ public class DAOPlaceTest {
     @Before
     public void initDao() {
         dao = new PlaceDAO("attractions", "place");
-        dao.truncateTable();
+        // dao.truncateTable();
     }
 
     @Before
@@ -128,6 +128,6 @@ public class DAOPlaceTest {
 
     @After
     public void cleanTable() {
-        dao.truncateTable();
+        //    dao.truncateTable();
     }
 }
